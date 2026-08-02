@@ -10,6 +10,7 @@ This fork includes small compatibility fixes that allow the game to compile clea
 * Corrected two map-array loops in `game.c`.
 * Changed:
 
+In line 126
 ```c
 i <= MAP_SIZE
 ```
