@@ -118,6 +118,7 @@ AI spectator views
 ------------------
 Start an AI-versus-AI match in one of four views:
 
+```bash
   ./vms-empire -a -v blue
   ./vms-empire -a -v red
   ./vms-empire -a -v shared
