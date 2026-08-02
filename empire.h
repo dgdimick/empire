@@ -218,6 +218,13 @@ typedef struct real_map { /* a cell of the actual map */
   piece_info_t *objp;     /* list of objects at this location */
 } real_map_t;
 
+
+/* AI-versus-AI spectator view modes. */
+#define VIEW_BLUE   0
+#define VIEW_RED    1
+#define VIEW_SHARED 2
+#define VIEW_FULL   3
+
 typedef struct view_map { /* a cell of one player's world view */
   char contents;          /* MAP_LAND, MAP_SEA, MAP_CITY, 'A', 'a', etc */
   long seen;              /* date when last updated */

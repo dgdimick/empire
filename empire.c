@@ -11,6 +11,8 @@ parser, and the simple commands.
 */
 
 #include "empire.h"
+#include <ctype.h>
+#include <curses.h>
 #include <stdio.h>
 #include <string.h>
 #include "extern.h"
@@ -18,8 +20,11 @@ parser, and the simple commands.
 void c_examine(void), c_movie(void);
 static void ai_vs_ai_loop(void);
 static void swap_sides(void);
-static void reveal_spectator_map(void);
+static void build_spectator_map(void);
+static void ai_spectator_delay(void);
+static const char *spectator_view_name(void);
 static void flip_view_symbols(view_map_t vmap[]);
+static view_map_t spectator_map[MAP_SIZE];
 
 /*
  * 03a 01Apr88 aml .Hacked movement algorithms for computer.
@@ -362,11 +367,11 @@ void c_movie(void) {
  */
 static void ai_vs_ai_loop(void) {
   for (;;) {
-    reveal_spectator_map();
-    print_zoom(user_map);
-    topmsg(1, "AI vs AI spectator mode - round %ld", date);
-    topmsg(2, "Ctrl-C stops the game; -d controls the delay.");
-    delay();
+    build_spectator_map();
+    print_zoom(spectator_map);
+    topmsg(1, "AI vs AI - round %ld - %s view", date, spectator_view_name());
+    topmsg(2, "B Blue  R Red  S Shared  F Full   Ctrl-C stops");
+    ai_spectator_delay();
 
     comp_move(1);
     if (win != no_win) break;
@@ -379,11 +384,22 @@ static void ai_vs_ai_loop(void) {
     save_game();
   }
 
-  reveal_spectator_map();
-  print_zoom(user_map);
+  /* Save the final position before offering to keep or discard the
+     AI-match files. */
+  save_game();
+
+  build_spectator_map();
+  print_zoom(spectator_map);
   topmsg(1, "AI vs AI game finished at round %ld.", date);
-  topmsg(2, "Press any key to exit.");
-  (void)get_chx();
+  topmsg(2, "Y keeps both files; N deletes both files.");
+
+  if (!getyn("Keep empsave.dat and info_list.txt? (Y/N) ")) {
+    if (remove(savefile) != 0)
+      error("Could not delete %s.", savefile);
+    if (remove("info_list.txt") != 0)
+      error("Could not delete info_list.txt.");
+  }
+
   empend();
 }
 
@@ -455,10 +471,69 @@ static void flip_view_symbols(view_map_t vmap[]) {
   }
 }
 
-static void reveal_spectator_map(void) {
+static const char *spectator_view_name(void) {
+  switch (spectator_view) {
+    case VIEW_BLUE: return "Blue fog";
+    case VIEW_RED: return "Red fog";
+    case VIEW_FULL: return "Full";
+    default: return "Shared fog";
+  }
+}
+
+static void build_spectator_map(void) {
   int i;
 
   for (i = 0; i < MAP_SIZE; i++) {
-    if (map[i].on_board) update(user_map, i);
+    spectator_map[i].contents = ' ';
+    spectator_map[i].seen = false;
+
+    if (spectator_view == VIEW_BLUE) {
+      spectator_map[i] = user_map[i];
+    }
+    else if (spectator_view == VIEW_RED) {
+      spectator_map[i] = comp_map[i];
+    }
+    else if (spectator_view == VIEW_FULL) {
+      if (map[i].on_board) update(spectator_map, i);
+    }
+    else { /* shared fog: show anything discovered by either AI */
+      if (user_map[i].seen || comp_map[i].seen) {
+        spectator_map[i].seen = true;
+        if (map[i].on_board)
+          update(spectator_map, i);
+        else if (user_map[i].seen)
+          spectator_map[i].contents = user_map[i].contents;
+        else
+          spectator_map[i].contents = comp_map[i].contents;
+      }
+    }
   }
+}
+
+static void ai_spectator_delay(void) {
+  int remaining = delay_time;
+  int c;
+  int slice;
+
+  (void)refresh();
+  (void)nodelay(stdscr, TRUE);
+
+  do {
+    c = getch();
+    if (c != ERR) {
+      switch (toupper(c)) {
+        case 'B': spectator_view = VIEW_BLUE; break;
+        case 'R': spectator_view = VIEW_RED; break;
+        case 'S': spectator_view = VIEW_SHARED; break;
+        case 'F': spectator_view = VIEW_FULL; break;
+      }
+    }
+
+    if (remaining <= 0) break;
+    slice = (remaining > 50) ? 50 : remaining;
+    (void)napms(slice);
+    remaining -= slice;
+  } while (remaining > 0);
+
+  (void)nodelay(stdscr, FALSE);
 }

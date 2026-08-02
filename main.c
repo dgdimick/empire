@@ -25,11 +25,12 @@ options:
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include "empire.h"
 #include "extern.h"
 
-#define OPTFLAGS "aw:s:d:S:f:"
+#define OPTFLAGS "av:w:s:d:S:f:"
 
 int main(argc, argv) int argc;
 char *argv[];
@@ -47,6 +48,7 @@ char *argv[];
   Sflg = 10;
   savefile = "empsave.dat";
   ai_vs_ai = false;
+  spectator_view = VIEW_SHARED;
 
   /*
    * extract command line options
@@ -56,6 +58,20 @@ char *argv[];
     switch (c) {
       case 'a':
         ai_vs_ai = true;
+        break;
+      case 'v':
+        if (strcmp(optarg, "blue") == 0)
+          spectator_view = VIEW_BLUE;
+        else if (strcmp(optarg, "red") == 0)
+          spectator_view = VIEW_RED;
+        else if (strcmp(optarg, "shared") == 0)
+          spectator_view = VIEW_SHARED;
+        else if (strcmp(optarg, "full") == 0)
+          spectator_view = VIEW_FULL;
+        else {
+          (void)printf("empire: -v must be blue, red, shared, or full.\n");
+          exit(1);
+        }
         break;
       case 'w':
         wflg = atoi(optarg);
@@ -78,7 +94,7 @@ char *argv[];
     }
   }
   if (errflg || (argc - optind) != 0) {
-    (void)printf("empire: usage: empire [-a] [-w water] [-s smooth] [-d delay]\n");
+    (void)printf("empire: usage: empire [-a] [-v blue|red|shared|full] [-w water] [-s smooth] [-d delay]\n");
     exit(1);
   }
 

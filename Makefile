@@ -111,7 +111,7 @@ uninstall:
 
 clean:
 	rm -f *.o TAGS vms-empire
-	rm -f *.6 *.html
+	rm -f *.html
 
 clobber: clean
 	rm -f vms-empire vms-empire-*.tar*

@@ -73,6 +73,7 @@ extern int user_lines;
 long date;            /* number of game turns played */
 bool automove;        /* true iff user is in automove mode */
 bool ai_vs_ai;        /* true iff both sides are computer controlled */
+int spectator_view;    /* AI spectator view: blue, red, shared, or full */
 bool resigned;        /* true iff computer resigned */
 bool debug;           /* true iff in debugging mode */
 bool print_debug;     /* true iff we print debugging stuff */
