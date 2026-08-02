@@ -123,7 +123,7 @@ void make_map(void) {
   /* count the number of cells at each height */
   for (i = 0; i <= MAX_HEIGHT; i++) height_count[i] = 0;
 
-  for (i = 0; i <= MAP_SIZE; i++) height_count[height[from][i]]++;
+  for (i = 0; i < MAP_SIZE; i++) height_count[height[from][i]]++;
 
   /* find the water line */
   loc = MAX_HEIGHT; /* default to all water */
