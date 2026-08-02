@@ -1,19 +1,95 @@
-		README for vms-empire
+# VMS Empire
 
-VMS-Empire is a simulation of a full-scale war between two
-emperors, the computer and you.  Naturally, there is only
-room for one, so the object of the game is to destroy
-the other.  The computer plays by the same rules that you
-do.  This game is the ancestor of all the multiplayer 4X
-simulations out there, including Civilization and Master of Orion.
+VMS Empire is a classic turn-based strategy game played in a text terminal. Units, cities, land, and water are represented using letters and ASCII characters.
 
-This code originated under VMS but has been forward-ported to
-modern ANSI C.  It is known to run not only on Linux but
-also under Windows and Mac OS X; all you need is a local
-port of the curses library.
+This fork includes small compatibility fixes that allow the game to compile cleanly on modern Linux systems, including Raspberry Pi OS.
 
-The files HACKING and BUGS will be of interest if you intend
-to modify this code.
+## Changes in this fork
 
-The ancestral code was by Chuck Simmons <chuck@amdahl.com>.  Since
-around 1990 it has been maintained by Eric S. Raymond <esr@thyrsus.com>
+* Added the GCC `-fcommon` compiler option to fix multiple-definition linker errors on modern GCC versions.
+* Corrected two map-array loops in `game.c`.
+* Changed:
+
+```c
+i <= MAP_SIZE
+```
+
+to:
+
+```c
+i < MAP_SIZE
+```
+
+This prevents the loops from accessing one element beyond the end of the arrays.
+
+## Requirements
+
+Install the compiler, development tools, Git, and ncurses library:
+
+```bash
+sudo apt update
+sudo apt install -y git build-essential libncurses-dev
+```
+
+## Download
+
+Clone this fork:
+
+```bash
+git clone https://github.com/dgdimick/empire.git
+cd empire
+```
+
+## Build
+
+Compile the game:
+
+```bash
+make
+```
+
+The executable will be created as:
+
+```text
+vms-empire
+```
+
+## Run
+
+Start the game with:
+
+```bash
+./vms-empire
+```
+
+## Clean and rebuild
+
+To remove compiled files and rebuild from scratch:
+
+```bash
+make clean
+make
+```
+
+## Repository remotes
+
+This fork is maintained at:
+
+```text
+https://github.com/dgdimick/empire
+```
+
+The original repository is:
+
+```text
+https://github.com/slacy/empire
+```
+
+## Platform tested
+
+The changes in this fork were tested on Raspberry Pi OS using a Raspberry Pi.
+
+## License
+
+This fork retains the original project’s licensing and copyright terms. See the repository files for the original license information.
+
