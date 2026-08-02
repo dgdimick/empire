@@ -45,8 +45,9 @@ void empire(void) {
   rndini(); /* init random number generator */
 
   clear_screen(); /* nothing on screen */
-  pos_str(7, 0, "EMPIRE, Version 5.00 site Amdahl 1-Apr-1988");
-  pos_str(8, 0, "Detailed directions are in EMPIRE.DOC\n");
+  pos_str(6, 0, "EMPIRE, Version 5.00 site Amdahl 1-Apr-1988");
+  pos_str(7, 0, "AI Spectator Fork 1.0 - Denis Dimick, 2026");
+  pos_str(8, 0, "Directions and build information are in README.md\n");
   (void)redisplay();
 
   if (!restore_game()) /* try to restore previous game */

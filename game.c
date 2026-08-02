@@ -547,7 +547,7 @@ int restore_game(void) {
 
   f = fopen(savefile, "r"); /* open for input */
   if (f == NULL) {
-    perror("Cannot open saved game");
+    topmsg(3, "No saved game found. Starting a new game.");
     return (false);
   }
   rbuf(map);

@@ -32,6 +32,64 @@ options:
 
 #define OPTFLAGS "av:w:s:d:S:f:"
 
+static void startup_menu(int *delay_ms) {
+  char input[64];
+  int choice;
+
+  (void)printf("VMS Empire 5.00 - AI Spectator Fork 1.0\n\n");
+  (void)printf("1. Normal game\n");
+  (void)printf("2. AI vs AI - Shared view\n");
+  (void)printf("3. AI vs AI - Blue view\n");
+  (void)printf("4. AI vs AI - Red view\n");
+  (void)printf("5. AI vs AI - Full view\n");
+  (void)printf("6. Quit\n\n");
+  (void)printf("Select mode [1]: ");
+  (void)fflush(stdout);
+
+  if (fgets(input, sizeof(input), stdin) == NULL || input[0] == '\n')
+    choice = 1;
+  else
+    choice = atoi(input);
+
+  switch (choice) {
+    case 1:
+      ai_vs_ai = false;
+      return;
+    case 2:
+      ai_vs_ai = true;
+      spectator_view = VIEW_SHARED;
+      break;
+    case 3:
+      ai_vs_ai = true;
+      spectator_view = VIEW_BLUE;
+      break;
+    case 4:
+      ai_vs_ai = true;
+      spectator_view = VIEW_RED;
+      break;
+    case 5:
+      ai_vs_ai = true;
+      spectator_view = VIEW_FULL;
+      break;
+    case 6:
+      exit(0);
+    default:
+      (void)printf("Invalid selection. Starting normal game.\n");
+      ai_vs_ai = false;
+      return;
+  }
+
+  (void)printf("Delay between updates in milliseconds [500]: ");
+  (void)fflush(stdout);
+  if (fgets(input, sizeof(input), stdin) != NULL && input[0] != '\n') {
+    int entered_delay = atoi(input);
+    if (entered_delay >= 0 && entered_delay <= 30000)
+      *delay_ms = entered_delay;
+    else
+      (void)printf("Invalid delay. Using 500 milliseconds.\n");
+  }
+}
+
 int main(argc, argv) int argc;
 char *argv[];
 {
@@ -49,6 +107,11 @@ char *argv[];
   savefile = "empsave.dat";
   ai_vs_ai = false;
   spectator_view = VIEW_SHARED;
+
+  if (argc == 1) {
+    dflg = 500;
+    startup_menu(&dflg);
+  }
 
   /*
    * extract command line options
