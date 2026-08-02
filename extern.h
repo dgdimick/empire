@@ -72,6 +72,7 @@ extern int user_lines;
 /* miscellaneous */
 long date;            /* number of game turns played */
 bool automove;        /* true iff user is in automove mode */
+bool ai_vs_ai;        /* true iff both sides are computer controlled */
 bool resigned;        /* true iff computer resigned */
 bool debug;           /* true iff in debugging mode */
 bool print_debug;     /* true iff we print debugging stuff */
@@ -106,6 +107,7 @@ char *savefile;
 /* global routines */
 
 void empire(void);
+void empend(void);
 
 void attack(piece_info_t *att_obj, long loc);
 void comp_move(int nmoves);
@@ -208,6 +210,7 @@ void embark(piece_info_t *ship, piece_info_t *obj);
 void disembark(piece_info_t *obj);
 void describe_obj(piece_info_t *obj);
 void scan(view_map_t vmap[], long loc);
+void update(view_map_t vmap[], long loc);
 void scan_sat(view_map_t *vmap, long loc);
 void set_prod(city_info_t *cityp);
 

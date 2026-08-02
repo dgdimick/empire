@@ -1061,7 +1061,8 @@ void check_endgame(void) {
 
   for (p = comp_obj[ARMY]; p != NULL; p = p->piece_link.next) ncomp_army++;
 
-  if (ncomp_city < nuser_city / 3 && ncomp_army < nuser_army / 3) {
+  if (!ai_vs_ai && ncomp_city < nuser_city / 3 &&
+      ncomp_army < nuser_army / 3) {
     clear_screen();
     prompt("The computer acknowledges defeat. Do");
     ksend("The computer acknowledges defeat.");

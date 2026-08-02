@@ -430,6 +430,9 @@ void print_zoom_cell(view_map_t *vmap, int row, int col, int row_inc,
                      int col_inc) {
   int r, c;
   char cell;
+#ifdef A_COLOR
+  chtype attr = COLOR_PAIR(COLOR_WHITE);
+#endif
 
   cell = ' ';
   for (r = row; r < row + row_inc; r++)
@@ -438,8 +441,28 @@ void print_zoom_cell(view_map_t *vmap, int row, int col, int row_inc,
           strchr(zoom_list, cell))
         cell = vmap[row_col_loc(r, c)].contents;
 
+#ifdef A_COLOR
+  if (ai_vs_ai) {
+    /* In spectator mode, USER is the Blue AI and COMP is the Red AI. */
+    if (cell == 'O' || strchr("TCBSDPFAZ", cell) != NULL)
+      attr = COLOR_PAIR(COLOR_BLUE) | A_BOLD;
+    else if (cell == 'X' || strchr("tcbsdpafz", cell) != NULL)
+      attr = COLOR_PAIR(COLOR_RED) | A_BOLD;
+    else if (cell == MAP_LAND || cell == '+')
+      attr = COLOR_PAIR(COLOR_GREEN);
+    else if (cell == MAP_SEA || cell == '.')
+      attr = COLOR_PAIR(COLOR_CYAN);
+  }
+  attron(attr);
+#endif
+
   (void)move(row / row_inc + NUMTOPS, col / col_inc);
   (void)addch((chtype)cell);
+
+#ifdef A_COLOR
+  attroff(attr);
+  attron(COLOR_PAIR(COLOR_WHITE));
+#endif
 }
 
 /*

@@ -12,9 +12,14 @@ parser, and the simple commands.
 
 #include "empire.h"
 #include <stdio.h>
+#include <string.h>
 #include "extern.h"
 
 void c_examine(void), c_movie(void);
+static void ai_vs_ai_loop(void);
+static void swap_sides(void);
+static void reveal_spectator_map(void);
+static void flip_view_symbols(view_map_t vmap[]);
 
 /*
  * 03a 01Apr88 aml .Hacked movement algorithms for computer.
@@ -41,6 +46,8 @@ void empire(void) {
 
   if (!restore_game()) /* try to restore previous game */
     init_game();       /* otherwise init a new game */
+
+  if (ai_vs_ai) ai_vs_ai_loop();
 
   /* Command loop starts here. */
 
@@ -345,3 +352,113 @@ void c_movie(void) {
 }
 
 /* end */
+
+
+/*
+ * Run both empires with the existing computer player.  The computer
+ * routines are written specifically for the COMP side, so the second
+ * half-turn is performed by swapping the two sides, calling comp_move(),
+ * and then swapping them back.
+ */
+static void ai_vs_ai_loop(void) {
+  for (;;) {
+    reveal_spectator_map();
+    print_zoom(user_map);
+    topmsg(1, "AI vs AI spectator mode - round %ld", date);
+    topmsg(2, "Ctrl-C stops the game; -d controls the delay.");
+    delay();
+
+    comp_move(1);
+    if (win != no_win) break;
+
+    swap_sides();
+    comp_move(1);
+    swap_sides();
+    if (win != no_win) break;
+
+    save_game();
+  }
+
+  reveal_spectator_map();
+  print_zoom(user_map);
+  topmsg(1, "AI vs AI game finished at round %ld.", date);
+  topmsg(2, "Press any key to exit.");
+  (void)get_chx();
+  empend();
+}
+
+static void swap_sides(void) {
+  static view_map_t temp_map[MAP_SIZE];
+  piece_info_t *temp_obj;
+  int temp_score;
+  int i;
+
+  (void)memcpy(temp_map, user_map, sizeof(temp_map));
+  (void)memcpy(user_map, comp_map, sizeof(temp_map));
+  (void)memcpy(comp_map, temp_map, sizeof(temp_map));
+
+  /* Each view map encodes USER pieces/cities as uppercase/O and COMP
+     pieces/cities as lowercase/X.  Since ownership is about to be
+     reversed, reverse those symbols too or the AI will mistake enemy
+     cities for its own. */
+  flip_view_symbols(user_map);
+  flip_view_symbols(comp_map);
+
+  for (i = 0; i < NUM_OBJECTS; i++) {
+    temp_obj = user_obj[i];
+    user_obj[i] = comp_obj[i];
+    comp_obj[i] = temp_obj;
+  }
+
+  for (i = 0; i < LIST_SIZE; i++) {
+    if (object[i].owner == USER)
+      object[i].owner = COMP;
+    else if (object[i].owner == COMP)
+      object[i].owner = USER;
+  }
+
+  for (i = 0; i < NUM_CITY; i++) {
+    if (city[i].owner == USER)
+      city[i].owner = COMP;
+    else if (city[i].owner == COMP)
+      city[i].owner = USER;
+  }
+
+  temp_score = user_score;
+  user_score = comp_score;
+  comp_score = temp_score;
+}
+
+
+static void flip_view_symbols(view_map_t vmap[]) {
+  int i;
+  char c;
+
+  for (i = 0; i < MAP_SIZE; i++) {
+    c = vmap[i].contents;
+    if (c == 'O')
+      vmap[i].contents = 'X';
+    else if (c == 'X')
+      vmap[i].contents = 'O';
+    else {
+      switch (c) {
+        case 'A': case 'F': case 'P': case 'S': case 'D':
+        case 'T': case 'C': case 'B': case 'Z':
+          vmap[i].contents = c - 'A' + 'a';
+          break;
+        case 'a': case 'f': case 'p': case 's': case 'd':
+        case 't': case 'c': case 'b': case 'z':
+          vmap[i].contents = c - 'a' + 'A';
+          break;
+      }
+    }
+  }
+}
+
+static void reveal_spectator_map(void) {
+  int i;
+
+  for (i = 0; i < MAP_SIZE; i++) {
+    if (map[i].on_board) update(user_map, i);
+  }
+}

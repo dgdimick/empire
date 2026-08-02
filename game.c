@@ -307,7 +307,10 @@ bool select_cities(void) {
                 "Choose a difficulty level where 0 is easy and %d is hard: ",
                 ncont * ncont - 1);
 
-  pair = get_range(jnkbuf, 0, ncont * ncont - 1);
+  if (ai_vs_ai)
+    pair = (ncont * ncont - 1) / 2;
+  else
+    pair = get_range(jnkbuf, 0, ncont * ncont - 1);
   comp_cont = pair_tab[pair].comp_cont;
   user_cont = pair_tab[pair].user_cont;
 
@@ -319,8 +322,10 @@ bool select_cities(void) {
     userp = cont_tab[user_cont].cityp[useri];
   } while (userp == compp);
 
-  topmsg(1, "Your city is at %d.", loc_disp(userp->loc));
-  delay(); /* let user see output before we set_prod */
+  if (!ai_vs_ai) {
+    topmsg(1, "Your city is at %d.", loc_disp(userp->loc));
+    delay(); /* let user see output before we set_prod */
+  }
 
   /* update city and map */
   compp->owner = COMP;
@@ -330,8 +335,9 @@ bool select_cities(void) {
 
   userp->owner = USER;
   userp->work = 0;
+  userp->prod = ARMY;
   scan(user_map, userp->loc);
-  set_prod(userp);
+  if (!ai_vs_ai) set_prod(userp);
   return (true);
 }
 

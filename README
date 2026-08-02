@@ -6,6 +6,8 @@ This fork includes small compatibility fixes that allow the game to compile clea
 
 ## Changes in this fork
 
+
+* Added AI-vers-AI support : "vms-empire -a -d 500" where 500 is the amount of time between AI turns 
 * Added the GCC `-fcommon` compiler option to fix multiple-definition linker errors on modern GCC versions.
 * Corrected two map-array loops in `game.c`.
 * Changed:
@@ -94,3 +96,21 @@ The changes in this fork were tested on Raspberry Pi OS using a Raspberry Pi.
 
 This fork retains the original project’s licensing and copyright terms. See the repository files for the original license information.
 
+
+
+AI vs AI spectator mode
+-----------------------
+
+This fork adds an unattended spectator mode where the existing computer
+player controls both empires. Start it with:
+
+    ./vms-empire -a
+
+Use the existing -d option to set the delay in milliseconds between map
+updates. For example:
+
+    ./vms-empire -a -d 500
+
+The full battlefield is shown using the condensed map display. The USER-side AI
+is shown in blue and the COMP-side AI is shown in red on color terminals. Press Ctrl-C
+to stop an active game. At the end of a game, press any key to exit.

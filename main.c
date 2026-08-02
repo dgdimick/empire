@@ -29,7 +29,7 @@ options:
 #include "empire.h"
 #include "extern.h"
 
-#define OPTFLAGS "w:s:d:S:f:"
+#define OPTFLAGS "aw:s:d:S:f:"
 
 int main(argc, argv) int argc;
 char *argv[];
@@ -46,6 +46,7 @@ char *argv[];
   dflg = 2000;
   Sflg = 10;
   savefile = "empsave.dat";
+  ai_vs_ai = false;
 
   /*
    * extract command line options
@@ -53,6 +54,9 @@ char *argv[];
 
   while ((c = getopt(argc, argv, OPTFLAGS)) != EOF) {
     switch (c) {
+      case 'a':
+        ai_vs_ai = true;
+        break;
       case 'w':
         wflg = atoi(optarg);
         break;
@@ -74,7 +78,7 @@ char *argv[];
     }
   }
   if (errflg || (argc - optind) != 0) {
-    (void)printf("empire: usage: empire [-w water] [-s smooth] [-d delay]\n");
+    (void)printf("empire: usage: empire [-a] [-w water] [-s smooth] [-d delay]\n");
     exit(1);
   }
 
